@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_tasks/providers/task_provider.dart';
+import 'package:my_tasks/screens/add_edit_task_screen.dart';
 import 'package:my_tasks/screens/login_screen.dart';
 import 'package:my_tasks/screens/splash_screen.dart';
 import 'package:my_tasks/screens/task_list_screen.dart';
@@ -31,6 +32,7 @@ class MyTasksApp extends StatelessWidget {
         routes: {
           LoginScreen.routeName: (_) => const LoginScreen(),
           TaskListScreen.routeName: (_) => const TaskListScreen(),
+          AddEditTaskScreen.routeName: (_) => const AddEditTaskScreen(),
         },
       ),
     );
