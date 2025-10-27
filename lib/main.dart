@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/providers/task_provider.dart';
 import 'package:my_tasks/screens/login_screen.dart';
 import 'package:my_tasks/screens/splash_screen.dart';
 import 'package:my_tasks/screens/task_list_screen.dart';
@@ -14,8 +15,11 @@ class MyTasksApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<AuthService>(
-      create: (_) => AuthService(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthService>(create: (_) => AuthService()),
+        ChangeNotifierProvider<TaskProvider>(create: (_) => TaskProvider()),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'My Tasks',
