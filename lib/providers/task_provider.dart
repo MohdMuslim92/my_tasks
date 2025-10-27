@@ -33,10 +33,42 @@ class TaskProvider extends ChangeNotifier {
   // Expose tasks as an unmodifiable list so UI can listen to provider.
   List<Task> get tasks => List.unmodifiable(_tasks);
 
-  // No add/edit/delete implementations here yet.
-  // Placeholder methods for future implementation:
-  //
-  // Future<void> addTask(Task task) async { ... }
-  // Future<void> updateTask(Task task) async { ... }
-  // Future<void> deleteTask(String id) async { ... }
+  Task? findById(String id) {
+  try {
+    return _tasks.firstWhere((t) => t.id == id);
+  } catch (e) {
+    return null;
+  }
+}
+
+  /// Add a new task. Generates a simple id based on timestamp.
+  Future<void> addTask({required String title, String description = '', TaskStatus status = TaskStatus.pending}) async {
+    final newTask = Task(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title,
+      description: description,
+      status: status,
+    );
+    _tasks.insert(0, newTask);
+    notifyListeners();
+  }
+
+  /// Update existing task by id.
+  Future<void> updateTask(String id, {String? title, String? description, TaskStatus? status}) async {
+    final idx = _tasks.indexWhere((t) => t.id == id);
+    if (idx == -1) return;
+    final current = _tasks[idx];
+    _tasks[idx] = current.copyWith(
+      title: title,
+      description: description,
+      status: status,
+    );
+    notifyListeners();
+  }
+
+  /// Delete a task by id.
+  Future<void> deleteTask(String id) async {
+    _tasks.removeWhere((t) => t.id == id);
+    notifyListeners();
+  }
 }
