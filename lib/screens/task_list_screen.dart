@@ -3,15 +3,33 @@ import 'package:provider/provider.dart';
 import 'package:my_tasks/services/auth_service.dart';
 import 'package:my_tasks/providers/task_provider.dart';
 import 'package:my_tasks/widgets/task_card.dart';
+import 'package:my_tasks/screens/add_edit_task_screen.dart';
 
 class TaskListScreen extends StatelessWidget {
   static const routeName = '/tasks';
   const TaskListScreen({super.key});
 
-  void _comingSoon(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature not available now')),
+  void _showSnack(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  Future<void> _confirmDelete(BuildContext context, String id) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete task'),
+        content: const Text('Are you sure you want to delete this task?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete')),
+        ],
+      ),
     );
+
+    if (confirmed == true) {
+      await Provider.of<TaskProvider>(context, listen: false).deleteTask(id);
+      _showSnack(context, 'Task deleted');
+    }
   }
 
   @override
@@ -60,8 +78,10 @@ class TaskListScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       ElevatedButton(
-                        onPressed: () => _comingSoon(context, 'Add task'),
-                        child: const Text('Add task (coming soon)'),
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const AddEditTaskScreen()),
+                        ),
+                        child: const Text('Add task'),
                       ),
                     ],
                   ),
@@ -74,17 +94,16 @@ class TaskListScreen extends StatelessWidget {
               final maxWidth = constraints.maxWidth;
               if (maxWidth >= 900) {
                 // Desktop: 3 columns
-                return _buildGrid(tasks, crossAxisCount: 3);
+                return _buildGrid(tasks, crossAxisCount: 3, context: context);
               } else if (maxWidth >= 600) {
                 // Tablet: 2 columns
-                return _buildGrid(tasks, crossAxisCount: 2);
+                return _buildGrid(tasks, crossAxisCount: 2, context: context);
               } else {
                 // Mobile: single-column list
                 return RefreshIndicator(
                   onRefresh: () async {
-                    // For now, just show a UI hint.
-                    _comingSoon(context, 'Refresh');
-                    await Future.delayed(const Duration(milliseconds: 400));
+                    // In-memory provider is instant; this is just UI affordance.
+                    _showSnack(context, 'Refreshed');
                   },
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
@@ -93,8 +112,13 @@ class TaskListScreen extends StatelessWidget {
                       final t = tasks[index];
                       return TaskCard(
                         task: t,
-                        onEdit: () => _comingSoon(context, 'Edit task'),
-                        onDelete: () => _comingSoon(context, 'Delete task'),
+                        onEdit: () {
+                          Navigator.of(context).pushNamed(
+                            AddEditTaskScreen.routeName,
+                            arguments: t.id,
+                          );
+                        },
+                        onDelete: () => _confirmDelete(context, t.id),
                       );
                     },
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -106,14 +130,16 @@ class TaskListScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _comingSoon(context, 'Add task'),
+        onPressed: () {
+          Navigator.of(context).pushNamed(AddEditTaskScreen.routeName);
+        },
         icon: const Icon(Icons.add),
         label: const Text('Add task'),
       ),
     );
   }
 
-  Widget _buildGrid(List tasks, {required int crossAxisCount}) {
+  Widget _buildGrid(List tasks, {required int crossAxisCount, required BuildContext context}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       child: GridView.builder(
@@ -128,12 +154,10 @@ class TaskListScreen extends StatelessWidget {
           final t = tasks[index];
           return TaskCard(
             task: t,
-            onEdit: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Edit coming soon')),
-            ),
-            onDelete: () => ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Delete coming soon')),
-            ),
+            onEdit: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddEditTaskScreen(taskId: t.id)));
+            },
+            onDelete: () => _confirmDelete(context, t.id),
           );
         },
       ),
