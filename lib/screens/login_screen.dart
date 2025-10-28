@@ -5,6 +5,7 @@ import 'package:my_tasks/screens/task_list_screen.dart';
 import 'package:my_tasks/services/auth_service.dart';
 import 'package:my_tasks/widgets/app_logo.dart';
 import 'package:my_tasks/widgets/auth_form.dart';
+import 'package:my_tasks/widgets/theme_toggle.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -44,7 +45,12 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sign in')),
+      appBar: AppBar(
+        title: const Text('Sign in'),
+        actions: const [
+          ThemeToggle(),
+        ],
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
