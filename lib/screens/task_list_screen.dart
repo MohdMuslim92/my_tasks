@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/widgets/theme_toggle.dart';
 import 'package:provider/provider.dart';
 import 'package:my_tasks/services/auth_service.dart';
 import 'package:my_tasks/providers/task_provider.dart';
@@ -40,6 +41,7 @@ class TaskListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Tasks'),
         actions: [
+          const ThemeToggle(),
           IconButton(
             tooltip: 'Logout',
             icon: const Icon(Icons.logout),
