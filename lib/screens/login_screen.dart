@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/providers/task_provider.dart';
+import 'package:my_tasks/screens/register_screen.dart';
 import 'package:my_tasks/screens/task_list_screen.dart';
 import 'package:my_tasks/services/auth_service.dart';
 import 'package:my_tasks/widgets/app_logo.dart';
+import 'package:my_tasks/widgets/auth_form.dart';
 import 'package:provider/provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,55 +16,32 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailCtl = TextEditingController();
-  final _passCtl = TextEditingController();
-  bool _loading = false;
-  String? _error;
+  // demo credentials
+  static const _demoEmail = 'test@example.com';
+  static const _demoPassword = 'Test@1234';
 
-  @override
-  void dispose() {
-    _emailCtl.dispose();
-    _passCtl.dispose();
-    super.dispose();
-  }
+  // If non-null, AuthForm will prefill these values.
+  String? _initialEmail;
+  String? _initialPassword;
 
-  Future<void> _submit() async {
-    setState(() {
-      _error = null;
-    });
-    if (!_formKey.currentState!.validate()) return;
-
-    setState(() {
-      _loading = true;
-    });
-
-    final auth = Provider.of<AuthService>(context, listen: false);
-    final success = await auth.login(
-      email: _emailCtl.text.trim(),
-      password: _passCtl.text,
-    );
-
-    setState(() {
-      _loading = false;
-    });
-
-    if (success) {
-      if (!mounted) return;
-      Navigator.of(context).pushReplacementNamed(TaskListScreen.routeName);
-    } else {
-      setState(() {
-        _error = 'Invalid email or password.';
-      });
-    }
-  }
+  /// This will be incremented to force AuthForm to re-apply
+  /// initial values no matter what.
+  int _prefillNonce = 0;
 
   @override
   Widget build(BuildContext context) {
-    final inputDecoration = InputDecoration(
-      border: const OutlineInputBorder(),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-    );
+    final auth = Provider.of<AuthService>(context, listen: false);
+    final tasks = Provider.of<TaskProvider>(context, listen: false);
+
+    Future<void> _onSubmit({required String email, required String password}) async {
+      // Attempt to login
+      await auth.login(email: email, password: password);
+      // bind provider to current user
+      tasks.bindToUser(auth.userId);
+      // navigate
+      if (!context.mounted) return;
+      Navigator.of(context).pushReplacementNamed(TaskListScreen.routeName);
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Sign in')),
@@ -74,70 +54,36 @@ class _LoginScreenState extends State<LoginScreen> {
               children: [
                 const AppLogo(size: 90, showText: true),
                 const SizedBox(height: 24),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-                      TextFormField(
-                        controller: _emailCtl,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: inputDecoration.copyWith(labelText: 'Email'),
-                        validator: (v) {
-                          if (v == null || v.trim().isEmpty) return 'Email is required';
-                          final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                          if (!regex.hasMatch(v.trim())) return 'Enter a valid email';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      TextFormField(
-                        controller: _passCtl,
-                        obscureText: true,
-                        decoration: inputDecoration.copyWith(labelText: 'Password'),
-                        validator: (v) {
-                          if (v == null || v.isEmpty) return 'Password is required';
-                          if (v.length < 4) return 'Password must be 4+ chars';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      if (_error != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            _error!,
-                            style: const TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _loading ? null : _submit,
-                          child: _loading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12),
-                                  child: Text('Sign in'),
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextButton(
-                        onPressed: _loading
-                            ? null
-                            : () {
-                                // Demo account
-                                _emailCtl.text = 'demo@example.com';
-                                _passCtl.text = 'password';
-                              },
-                        child: const Text('Use demo credentials'),
-                      ),
-                    ],
-                  ),
+                AuthForm(
+                  isRegister: false,
+                  submitLabel: 'Sign in',
+                  onSubmit: _onSubmit,
+                  initialEmail: _initialEmail,
+                  initialPassword: _initialPassword,
+                  prefillNonce: _prefillNonce,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        // Force clear then refill demo credentials
+                        setState(() {
+                          _initialEmail = _demoEmail;
+                          _initialPassword = _demoPassword;
+                          _prefillNonce++; // signal AuthForm to reapply values
+                        });
+                      },
+                      child: const Text('Use demo credentials'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed(RegisterScreen.routeName);
+                      },
+                      child: const Text('Create account'),
+                    ),
+                  ],
                 ),
               ],
             ),

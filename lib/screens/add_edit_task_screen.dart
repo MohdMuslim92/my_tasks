@@ -37,7 +37,46 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
   Widget build(BuildContext context) {
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final isEdit = _taskId != null;
-    final Task? task = isEdit ? provider.findById(_taskId!) : null;
+
+    // Look up the task from the provider's current tasks list.
+    Task? task;
+    if (isEdit) {
+      final matches = provider.tasks.where((t) => t.id == _taskId).toList();
+      if (matches.isNotEmpty) {
+        task = matches.first;
+      } else {
+        task = null;
+      }
+    } else {
+      task = null;
+    }
+
+    // If we're in edit mode and the task is not available yet, show a loading/placeholder.
+    if (isEdit && task == null) {
+      // It's possible the provider is still syncing from Firestore.
+      // Show a helpful UI instead of throwing.
+      return Scaffold(
+        appBar: AppBar(title: const Text('Edit Task')),
+        body: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 12),
+                  Text(
+                    'Loading task… If this keeps happening the task may not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
