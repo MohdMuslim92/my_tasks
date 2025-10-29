@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
+import 'package:my_tasks/providers/locale_provider.dart';
 import 'package:my_tasks/themes/app_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -29,31 +32,48 @@ class MyTasksApp extends StatelessWidget {
         ChangeNotifierProvider<AuthService>(create: (_) => AuthService()),
         ChangeNotifierProvider<TaskProvider>(create: (_) => TaskProvider()),
         ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider<LocaleProvider>(create: (_) => LocaleProvider()),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProv, _) {
-          return AnimatedBuilder(
-            animation: themeProv,
-            builder: (context, _) {
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                title: 'My Tasks',
-                theme: appLightTheme,
-                darkTheme: appDarkTheme,
-                themeMode: themeProv.mode,
-                // We'll let Splash handle navigation after checking auth state.
-                home: const SplashScreen(),
-                routes: {
-                  LoginScreen.routeName: (_) => const LoginScreen(),
-                  RegisterScreen.routeName: (_) => const RegisterScreen(),
-                  TaskListScreen.routeName: (_) => const TaskListScreen(),
-                  AddEditTaskScreen.routeName: (_) => const AddEditTaskScreen(),
-                },
-              );
+      child: Consumer2<ThemeProvider, LocaleProvider>(
+        builder: (context, themeProv, localeProv, _) {
+          // Ensure we don't build before localeProv is initialized (optional guard)
+          if (!localeProv.initialized) {
+            return const MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          }
+
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'My Tasks',
+            theme: appLightTheme,
+            darkTheme: appDarkTheme,
+            themeMode: themeProv.mode,
+
+            // locale binding
+            locale: localeProv.locale, // null → system locale
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+
+            // Routes
+            home: const SplashScreen(),
+            routes: {
+              LoginScreen.routeName: (_) => const LoginScreen(),
+              RegisterScreen.routeName: (_) => const RegisterScreen(),
+              TaskListScreen.routeName: (_) => const TaskListScreen(),
+              AddEditTaskScreen.routeName: (_) => const AddEditTaskScreen(),
             },
           );
-        }
-      )
+        },
+      ),
     );
   }
 }
