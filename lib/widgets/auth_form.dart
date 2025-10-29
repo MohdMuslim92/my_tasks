@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 
 typedef AuthFormSubmit = Future<void> Function({
   required String email,
@@ -89,30 +90,31 @@ class _AuthFormState extends State<AuthForm> {
   }
 
   String _friendlyFirebaseAuthMessage(FirebaseAuthException e) {
+    final loc = AppLocalizations.of(context)!;
     if (!widget.isRegister) {
       const loginGeneric = 'Invalid email or password.';
       switch (e.code) {
         case 'user-not-found':
         case 'wrong-password':
         case 'invalid-email':
-          return loginGeneric;
+          return loc.authInvalidCredentials;
         case 'too-many-requests':
-          return 'Too many attempts. Please try again later.';
+          return loc.authTooManyRequests;
         default:
-          return 'Authentication failed. Please check your credentials.';
+          return loc.authGenericFailure;
       }
     } else {
       switch (e.code) {
         case 'email-already-in-use':
-          return 'This email is already in use. Try signing in or use a different email.';
+          return loc.registerEmailInUse;
         case 'invalid-email':
-          return 'Enter a valid email address.';
+          return loc.registerInvalidEmail;
         case 'weak-password':
-          return 'Password is too weak. Use a stronger password (6+ chars).';
+          return loc.registerWeakPassword;
         case 'operation-not-allowed':
-          return 'Email/password sign-in is not enabled.';
+          return loc.registerOperationNotAllowed;
         default:
-          return 'Registration failed. Please try again.';
+          return loc.registerGenericFailure;
       }
     }
   }
@@ -126,7 +128,7 @@ class _AuthFormState extends State<AuthForm> {
 
     if (widget.isRegister) {
       if (_confirmCtl.text != password) {
-        setState(() => _error = 'Passwords do not match');
+        setState(() => _error = AppLocalizations.of(context)!.passwordsDoNotMatch);
         return;
       }
     }
@@ -141,7 +143,7 @@ class _AuthFormState extends State<AuthForm> {
       setState(() => _error = _friendlyFirebaseAuthMessage(e));
     } catch (e) {
       // Generic fallback for network / unexpected errors
-      setState(() => _error = 'Something went wrong. Please try again.');
+      setState(() => _error = AppLocalizations.of(context)!.unexpectedError);
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -157,6 +159,8 @@ class _AuthFormState extends State<AuthForm> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    const minLen = 4;
     return Form(
       key: _formKey,
       child: Column(
@@ -165,11 +169,11 @@ class _AuthFormState extends State<AuthForm> {
           TextFormField(
             controller: _emailCtl,
             keyboardType: TextInputType.emailAddress,
-            decoration: _inputDecoration('Email'),
+            decoration: _inputDecoration(loc.emailLabel),
             validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Email is required';
+              if (v == null || v.trim().isEmpty) return loc.emailRequired;
               final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-              if (!regex.hasMatch(v.trim())) return 'Enter a valid email';
+              if (!regex.hasMatch(v.trim())) return loc.enterValidEmail;
               return null;
             },
             enabled: !_loading,
@@ -180,16 +184,16 @@ class _AuthFormState extends State<AuthForm> {
           TextFormField(
             controller: _passCtl,
             obscureText: _obscure,
-            decoration: _inputDecoration('Password').copyWith(
+            decoration: _inputDecoration(loc.passwordLabel).copyWith(
               suffixIcon: IconButton(
-                tooltip: _obscure ? 'Show password' : 'Hide password',
+                tooltip: _obscure ? loc.showPassword : loc.hidePassword,
                 icon: Icon(_obscure ? Icons.visibility : Icons.visibility_off),
                 onPressed: () => setState(() => _obscure = !_obscure),
               ),
             ),
             validator: (v) {
-              if (v == null || v.isEmpty) return 'Password is required';
-              if (v.length < 4) return 'Password must be 4+ chars';
+              if (v == null || v.isEmpty) return loc.passwordRequired;
+              if (v.length < minLen) return loc.passwordMinLength(minLen);
               return null;
             },
             enabled: !_loading,
@@ -203,10 +207,10 @@ class _AuthFormState extends State<AuthForm> {
                 TextFormField(
                   controller: _confirmCtl,
                   obscureText: _obscure,
-                  decoration: _inputDecoration('Confirm password'),
+                  decoration: _inputDecoration(loc.confirmPasswordLabel),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Please confirm password';
-                    if (v.length < 4) return 'Password must be 4+ chars';
+                    if (v == null || v.isEmpty) return loc.passwordRequired;
+                    if (v.length < minLen) return loc.passwordMinLength(minLen);
                     return null;
                   },
                   enabled: !_loading,

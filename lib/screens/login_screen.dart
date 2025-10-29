@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 import 'package:my_tasks/providers/task_provider.dart';
 import 'package:my_tasks/screens/register_screen.dart';
 import 'package:my_tasks/screens/task_list_screen.dart';
 import 'package:my_tasks/services/auth_service.dart';
 import 'package:my_tasks/widgets/app_logo.dart';
 import 'package:my_tasks/widgets/auth_form.dart';
+import 'package:my_tasks/widgets/language_switcher.dart';
 import 'package:my_tasks/widgets/theme_toggle.dart';
 import 'package:provider/provider.dart';
 
@@ -31,6 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final auth = Provider.of<AuthService>(context, listen: false);
     final tasks = Provider.of<TaskProvider>(context, listen: false);
 
@@ -46,9 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign in'),
-        actions: const [
-          ThemeToggle(),
+        title: Text(loc.signIn),
+        actions: [
+          const ThemeToggle(),
+          const LanguageSwitcher(),
         ],
       ),
       body: Center(
@@ -62,7 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 24),
                 AuthForm(
                   isRegister: false,
-                  submitLabel: 'Sign in',
+                  submitLabel: loc.signIn,
                   onSubmit: _onSubmit,
                   initialEmail: _initialEmail,
                   initialPassword: _initialPassword,
@@ -81,13 +85,13 @@ class _LoginScreenState extends State<LoginScreen> {
                           _prefillNonce++; // signal AuthForm to reapply values
                         });
                       },
-                      child: const Text('Use demo credentials'),
+                      child: Text(loc.useDemoCredentials),
                     ),
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pushNamed(RegisterScreen.routeName);
                       },
-                      child: const Text('Create account'),
+                      child: Text(loc.createAccount),
                     ),
                   ],
                 ),

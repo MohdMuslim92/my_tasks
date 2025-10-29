@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 import 'package:my_tasks/models/task.dart';
 
 typedef OnSaveTask = Future<void> Function({
@@ -59,6 +60,8 @@ class _TaskFormState extends State<TaskForm> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -69,12 +72,12 @@ class _TaskFormState extends State<TaskForm> {
             // Title (required)
             TextFormField(
               controller: _titleCtl,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.taskTitleLabel,
+                border: const OutlineInputBorder(),
               ),
               validator: (v) {
-                if (v == null || v.trim().isEmpty) return 'Title is required';
+                if (v == null || v.trim().isEmpty) return loc.taskTitleRequired;
                 return null;
               },
             ),
@@ -85,9 +88,9 @@ class _TaskFormState extends State<TaskForm> {
               controller: _descCtl,
               minLines: 3,
               maxLines: 6,
-              decoration: const InputDecoration(
-                labelText: 'Description',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: loc.taskDescriptionLabel,
+                border: const OutlineInputBorder(),
                 alignLabelWithHint: true,
               ),
             ),
@@ -96,11 +99,23 @@ class _TaskFormState extends State<TaskForm> {
             // Status selector
             DropdownButtonFormField<TaskStatus>(
               value: _status,
-              decoration: const InputDecoration(border: OutlineInputBorder(), labelText: 'Status'),
-              items: const [
-                DropdownMenuItem(value: TaskStatus.pending, child: Text('Pending')),
-                DropdownMenuItem(value: TaskStatus.inProgress, child: Text('In Progress')),
-                DropdownMenuItem(value: TaskStatus.done, child: Text('Done')),
+              decoration: InputDecoration(
+                border: const OutlineInputBorder(),
+                labelText: loc.taskStatusLabel,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: TaskStatus.pending,
+                  child: Text(loc.taskStatusPending),
+                ),
+                DropdownMenuItem(
+                  value: TaskStatus.inProgress,
+                  child: Text(loc.taskStatusInProgress),
+                ),
+                DropdownMenuItem(
+                  value: TaskStatus.done,
+                  child: Text(loc.taskStatusDone),
+                ),
               ],
               onChanged: (v) {
                 if (v != null) setState(() => _status = v);
@@ -114,16 +129,20 @@ class _TaskFormState extends State<TaskForm> {
               child: ElevatedButton(
                 onPressed: widget.isSaving ? null : _handleSave,
                 child: widget.isSaving
-                  ? const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Save'),
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(loc.save),
                       ),
               ),
             ),
           ],
         ),
-      )
+      ),
     );
   }
 }

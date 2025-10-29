@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:my_tasks/models/task.dart';
 import 'package:my_tasks/providers/task_provider.dart';
@@ -35,6 +36,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final provider = Provider.of<TaskProvider>(context, listen: false);
     final isEdit = _taskId != null;
 
@@ -47,8 +49,6 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
       } else {
         task = null;
       }
-    } else {
-      task = null;
     }
 
     // If we're in edit mode and the task is not available yet, show a loading/placeholder.
@@ -56,18 +56,18 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
       // It's possible the provider is still syncing from Firestore.
       // Show a helpful UI instead of throwing.
       return Scaffold(
-        appBar: AppBar(title: const Text('Edit Task')),
+        appBar: AppBar(title: Text(loc.editTaskLabel)),
         body: SafeArea(
           child: Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: const [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 12),
+                children: [
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 12),
                   Text(
-                    'Loading task… If this keeps happening the task may not exist.',
+                    loc.loadingTaskMessage,
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -80,7 +80,7 @@ class _AddEditTaskScreenState extends State<AddEditTaskScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? 'Edit Task' : 'Add Task'),
+        title: Text(isEdit ? loc.editTaskLabel : loc.addTask),
       ),
       body: SafeArea(
         child: Padding(
