@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:my_tasks/l10n/app_localizations.dart';
+import 'package:my_tasks/widgets/language_switcher.dart';
 import 'package:my_tasks/widgets/theme_toggle.dart';
 import 'package:provider/provider.dart';
 import 'package:my_tasks/services/auth_service.dart';
@@ -45,6 +46,7 @@ class TaskListScreen extends StatelessWidget {
         title: Text(loc.tasksTitle),
         actions: [
           const ThemeToggle(),
+          const LanguageSwitcher(),
           IconButton(
             tooltip: loc.logoutTooltip,
             icon: const Icon(Icons.logout),
