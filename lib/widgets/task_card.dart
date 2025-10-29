@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 import 'package:my_tasks/models/task.dart';
 
 class TaskCard extends StatelessWidget {
@@ -25,27 +26,30 @@ class TaskCard extends StatelessWidget {
     }
   }
 
-  String _statusLabel() {
+  String _statusLabel(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     switch (task.status) {
       case TaskStatus.inProgress:
-        return 'In progress';
+        return loc.taskStatusInProgress;
       case TaskStatus.done:
-        return 'Done';
+        return loc.taskStatusDone;
       case TaskStatus.pending:
       default:
-        return 'Pending';
+        return loc.taskStatusPending;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Card(
       clipBehavior: Clip.hardEdge,
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Task details not available.')),
+          SnackBar(content: Text(loc.loadingTaskMessage)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -71,7 +75,7 @@ class TaskCard extends StatelessWidget {
                   // If callbacks are null, menu items are disabled.
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.more_vert),
-                    tooltip: 'Task actions',
+                    tooltip: loc.editTaskLabel,
                     onSelected: (value) {
                       if (value == 'edit') {
                         // call parent handler if provided
@@ -85,9 +89,12 @@ class TaskCard extends StatelessWidget {
                         value: 'edit',
                         enabled: onEdit != null,
                         child: Text(
-                          'Edit',
+                          loc.editTaskLabel,
                           style: onEdit == null
-                              ? Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).disabledColor)
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: Theme.of(context).disabledColor)
                               : null,
                         ),
                       ),
@@ -95,9 +102,12 @@ class TaskCard extends StatelessWidget {
                         value: 'delete',
                         enabled: onDelete != null,
                         child: Text(
-                          'Delete',
+                          loc.delete,
                           style: onDelete == null
-                              ? Theme.of(context).textTheme.bodySmall?.copyWith(color: Theme.of(context).disabledColor)
+                              ? Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: Theme.of(context).disabledColor)
                               : null,
                         ),
                       ),
@@ -109,9 +119,7 @@ class TaskCard extends StatelessWidget {
               const SizedBox(height: 8),
 
               ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxHeight: 90,
-                ),
+                constraints: const BoxConstraints(maxHeight: 90),
                 child: Text(
                   task.description,
                   maxLines: 5,
@@ -128,7 +136,7 @@ class TaskCard extends StatelessWidget {
                 children: [
                   Chip(
                     label: Text(
-                      _statusLabel(),
+                      _statusLabel(context),
                       style: const TextStyle(color: Colors.white),
                     ),
                     backgroundColor: _statusColor(context),

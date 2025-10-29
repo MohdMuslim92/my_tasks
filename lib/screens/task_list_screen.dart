@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 import 'package:my_tasks/widgets/theme_toggle.dart';
 import 'package:provider/provider.dart';
 import 'package:my_tasks/services/auth_service.dart';
@@ -15,35 +16,37 @@ class TaskListScreen extends StatelessWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context, String id) async {
+    final loc = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete task'),
-        content: const Text('Are you sure you want to delete this task?'),
+        title: Text(loc.deleteTaskTitle),
+        content: Text(loc.deleteTaskContent),
         actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: const Text('Cancel')),
-          ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.of(ctx).pop(false), child: Text(loc.cancel)),
+          ElevatedButton(onPressed: () => Navigator.of(ctx).pop(true), child: Text(loc.delete)),
         ],
       ),
     );
 
     if (confirmed == true) {
       await Provider.of<TaskProvider>(context, listen: false).deleteTask(id);
-      _showSnack(context, 'Task deleted');
+      _showSnack(context, loc.taskDeleted);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthService>(context, listen: false);
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tasks'),
+        title: Text(loc.tasksTitle),
         actions: [
           const ThemeToggle(),
           IconButton(
-            tooltip: 'Logout',
+            tooltip: loc.logoutTooltip,
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await auth.logout();
@@ -69,21 +72,16 @@ class TaskListScreen extends StatelessWidget {
                     children: [
                       Icon(Icons.task_alt_outlined, size: 64, color: Theme.of(context).hintColor),
                       const SizedBox(height: 12),
-                      const Text(
-                        'No tasks yet',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
+                      Text(loc.noTasksYet,
+                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Create tasks to see them here.',
-                        textAlign: TextAlign.center,
-                      ),
+                      Text(loc.createTasksHint, textAlign: TextAlign.center),
                       const SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: () => Navigator.of(context).push(
                           MaterialPageRoute(builder: (_) => const AddEditTaskScreen()),
                         ),
-                        child: const Text('Add task'),
+                        child: Text(loc.addTask),
                       ),
                     ],
                   ),
@@ -103,10 +101,8 @@ class TaskListScreen extends StatelessWidget {
               } else {
                 // Mobile: single-column list
                 return RefreshIndicator(
-                  onRefresh: () async {
-                    // In-memory provider is instant; this is just UI affordance.
-                    _showSnack(context, 'Refreshed');
-                  },
+                  // In-memory provider is instant; this is just UI affordance.
+                  onRefresh: () async => _showSnack(context, loc.refreshMessage),
                   child: ListView.separated(
                     padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
                     itemCount: tasks.length,
@@ -136,12 +132,13 @@ class TaskListScreen extends StatelessWidget {
           Navigator.of(context).pushNamed(AddEditTaskScreen.routeName);
         },
         icon: const Icon(Icons.add),
-        label: const Text('Add task'),
+        label: Text(loc.addTask),
       ),
     );
   }
 
   Widget _buildGrid(List tasks, {required int crossAxisCount, required BuildContext context}) {
+    final loc = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
       child: GridView.builder(
@@ -157,7 +154,8 @@ class TaskListScreen extends StatelessWidget {
           return TaskCard(
             task: t,
             onEdit: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddEditTaskScreen(taskId: t.id)));
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => AddEditTaskScreen(taskId: t.id)));
             },
             onDelete: () => _confirmDelete(context, t.id),
           );

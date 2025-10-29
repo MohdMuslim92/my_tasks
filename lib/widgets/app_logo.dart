@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 
 class AppLogo extends StatelessWidget {
   final double size;
@@ -7,6 +8,8 @@ class AppLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -22,7 +25,7 @@ class AppLogo extends StatelessWidget {
         if (showText) ...[
           const SizedBox(height: 12),
           Text(
-            'my tasks',
+            loc.appLogo,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.6,

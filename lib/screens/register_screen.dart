@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:my_tasks/l10n/app_localizations.dart';
 import 'package:my_tasks/providers/task_provider.dart';
 import 'package:my_tasks/screens/task_list_screen.dart';
 import 'package:my_tasks/services/auth_service.dart';
@@ -12,6 +13,7 @@ class RegisterScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final auth = Provider.of<AuthService>(context, listen: false);
     final tasks = Provider.of<TaskProvider>(context, listen: false);
 
@@ -24,7 +26,7 @@ class RegisterScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
+      appBar: AppBar(title: Text(loc.createAccount)),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -36,7 +38,7 @@ class RegisterScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 AuthForm(
                   isRegister: true,
-                  submitLabel: 'Create account',
+                  submitLabel: loc.createAccount,
                   onSubmit: _onSubmit,
                 ),
                 const SizedBox(height: 12),
@@ -44,7 +46,7 @@ class RegisterScreen extends StatelessWidget {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Already have an account? Sign in'),
+                  child: Text(loc.alreadyHaveAccount),
                 ),
               ],
             ),
